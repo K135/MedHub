@@ -1,10 +1,10 @@
 "use client"
 import NiceSelect from '@/ui/NiceSelect';
 import Link from 'next/link';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-const CoursesGridArea = () => {
+const CoursesGridAreaContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const coursesRef = useRef<HTMLDivElement>(null);
@@ -1406,6 +1406,14 @@ const CoursesGridArea = () => {
           </div>
         )}
     </>
+  );
+};
+
+const CoursesGridArea = () => {
+  return (
+    <Suspense fallback={<div>Loading courses...</div>}>
+      <CoursesGridAreaContent />
+    </Suspense>
   );
 };
 
