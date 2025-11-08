@@ -19,15 +19,15 @@ const ContactArea = () => {
                                 <i className="flaticon-map"></i>
                             </div>
                             <h5>
-                                Academic Location
+                                MedHub Headquarters
                             </h5>
                             <div className="image">
                                 <img src="assets/img/small-line.png" alt="img" />
                             </div>
                             <h4>
-                                70 Washington Square <br />
-                                South New York, NY 10012, <br />
-                                 United States
+                                Medical Education Center <br />
+                                123 Healthcare Drive, <br />
+                                Medical District, NY 10001
                             </h4>
                         </div>
                     </div>
@@ -43,8 +43,8 @@ const ContactArea = () => {
                                 <img src="assets/img/small-line.png" alt="img" />
                             </div>
                             <h4>
-                                <a href="mailto:supportedus@gmail.com">supportedus@gmail.com</a> <br />
-                                <a href="mailto:www.eduspace.com">www.eduspace.com</a>
+                                <a href="mailto:support@medhub.com">support@medhub.com</a> <br />
+                                <a href="mailto:info@medhub.com">info@medhub.com</a>
                             </h4>
                         </div>
                     </div>
@@ -54,14 +54,14 @@ const ContactArea = () => {
                                 <img src="assets/img/call.png" alt="img" />
                             </div>
                             <h5>
-                                Emergency
+                                Support Hotline
                             </h5>
                             <div className="image">
                                 <img src="assets/img/small-line.png" alt="img" />
                             </div>
                             <h4>
-                                <a href="tel:++00012345688">+000 123 456 88</a> <br />
-                                <a href="tel:+4325688899">+432 568 88 99</a>
+                                <a href="tel:+1800MEDHUB">1-800-MED-HUB</a> <br />
+                                <a href="tel:+18006334823">+1 (800) 633-4823</a>
                             </h4>
                         </div>
                     </div>
