@@ -60,8 +60,8 @@ const ContactArea = () => {
                                 <img src="assets/img/small-line.png" alt="img" />
                             </div>
                             <h4>
-                                <a href="tel:+1800MEDHUB">1-800-MED-HUB</a> <br />
-                                <a href="tel:+18006334823">+1 (800) 633-4823</a>
+                                <a href="tel:+1800999999">1800-999999</a> <br />
+                                <a href="tel:+978006334823">+97 (800) 633-4823</a>
                             </h4>
                         </div>
                     </div>
