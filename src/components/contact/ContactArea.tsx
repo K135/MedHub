@@ -25,9 +25,9 @@ const ContactArea = () => {
                                 <img src="assets/img/small-line.png" alt="img" />
                             </div>
                             <h4>
-                                Medical Education Center <br />
-                                123 Healthcare Drive, <br />
-                                Medical District, NY 10001
+                                Dubai Healthcare City <br />
+                                Building 64, Al Razi Street, <br />
+                                Dubai, United Arab Emirates
                             </h4>
                         </div>
                     </div>
