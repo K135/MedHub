@@ -2,7 +2,6 @@
 "use client"
 
 import UseSticky from '@/hooks/UseSticky';
-import NiceSelect from '@/ui/NiceSelect';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import NavMenu from './NavMenu';
@@ -12,7 +11,6 @@ import OffCanvas from '@/common/OffCanvas';
 
 const HeaderOne = () => {
 
-  const selectHandler = (e: any) => { };
   const { sticky } = UseSticky()
 
 
@@ -27,43 +25,21 @@ const HeaderOne = () => {
             <div className="container-fluid">
                 <div className="mega-menu-wrapper">
                     <div className="header-main">
-                        <div className="header-left">
+                        <div className="header-left" style={{ flex: 1, maxWidth: "none" }}>
                             <div className="logo">
                                 <Link href="/" className="header-logo">
                                     <img src="assets/img/logo/medhub logo.png" alt="logo-img" style={{maxHeight: "50px", width: "auto"}} />
                                 </Link>
                             </div>
-                            <div className="category-oneadjust">
-                               <div className="dot">
-                                    <img src="assets/img/logo/dot.png" alt="img" />
-                               </div> 
-
-                                <NiceSelect
-                                  className="category"
-                                  options={[
-                                    { value: "01", text: "Category" },
-                                    { value: "02", text: "Clinical Nursing" },
-                                    { value: "03", text: "Cardiology" },
-                                    { value: "04", text: "Radiology" },
-                                    { value: "05", text: "Surgery" },
-                                    { value: "06", text: "Pediatrics" },
-                                    { value: "07", text: "Psychiatry" },
-                                  ]}
-                                  defaultCurrent={0}
-                                  onChange={selectHandler}
-                                  name=""
-                                  placeholder="" />
-
+                        </div>
+                        <div className="mean__menu-wrapper d-none d-xl-block">
+                            <div className="main-menu">
+                                <nav id="mobile-menu">
+                                    <NavMenu />
+                                </nav>
                             </div>
                         </div>
-                        <div className="header-right d-flex justify-content-end align-items-center">
-                            <div className="mean__menu-wrapper">
-                                <div className="main-menu">
-                                    <nav id="mobile-menu">
-                                        <NavMenu />
-                                    </nav>
-                                </div>
-                            </div>
+                        <div className="header-right d-flex justify-content-end align-items-center" style={{ flex: 1 }}>
                             <div className="header-search">
                                 <button 
                                 onClick={ () => setOpen(!open)}
@@ -71,7 +47,6 @@ const HeaderOne = () => {
                             </div>
                             <div className="header-button">
                                 <Link href="/sign-in" className="theme-btn style-2"><i className="far fa-user"></i> Admin</Link>
-                                <Link href="/register" className="theme-btn yellow-btn">Enroll Now</Link>
                             </div>
                             <div className="header__hamburger d-xl-none my-auto">
                                 <div className="sidebar__toggle">

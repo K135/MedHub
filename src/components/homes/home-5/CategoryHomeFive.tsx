@@ -4,12 +4,12 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 
 const category_data = [
-  { title: "For Physicians", icon: "healthcare", coursesCount: "45", delay: ".3s" },
-  { title: "For Nurses", icon: "healthcare", coursesCount: "38", delay: ".5s" },
-  { title: "For Dentists", icon: "healthcare", coursesCount: "28", delay: ".7s" },
-  { title: "For Pharmacists", icon: "cooperation", coursesCount: "32", delay: ".3s" },
-  { title: "For Allied Health", icon: "healthcare", coursesCount: "24", delay: ".5s" },
-  { title: "Pharma & MedTech", icon: "megaphone", coursesCount: "18", delay: ".7s" }
+  { title: "For Physicians", icon: "healthcare", delay: ".3s" },
+  { title: "For Nurses", icon: "healthcare", delay: ".5s" },
+  { title: "For Dentists", icon: "healthcare", delay: ".7s" },
+  { title: "For Pharmacists", icon: "cooperation", delay: ".3s" },
+  { title: "For Allied Health", icon: "healthcare",  delay: ".5s" },
+  { title: "Pharma & MedTech", icon: "megaphone",  delay: ".7s" }
 ];
 
  
@@ -39,7 +39,7 @@ const CategoryHomeFive = () => {
                           </div>
                           <div className="content">
                               <h4><Link href="/courses">{item.title}</Link></h4>
-                              <span>( {item.coursesCount} Courses)</span>
+
                           </div>
                       </div>
                   </div>

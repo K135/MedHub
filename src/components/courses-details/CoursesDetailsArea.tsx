@@ -1,8 +1,15 @@
 "use client"
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
+import axiosInstance, { BACKEND_URL } from '../../api/axios';
 
 const CoursesDetailsArea = () => {
+  const searchParams = useSearchParams();
+  const courseId = searchParams.get('id');
+  const [course, setCourse] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
   const [quantity, setQuantity] = useState(1);
   const [activeSection, setActiveSection] = useState('overview');
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
@@ -17,6 +24,31 @@ const CoursesDetailsArea = () => {
     licenseNumber: ''
   });
 
+  useEffect(() => {
+    if (courseId) {
+      const fetchCourse = async () => {
+        try {
+          const res = await axiosInstance.get(`/courses/public/${courseId}`);
+          setCourse(res.data);
+        } catch (err) {
+          console.error('Error fetching course:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchCourse();
+    } else {
+      setLoading(false);
+    }
+  }, [courseId]);
+
+  const newDrugs = course?.topics || [];
+  const treatments = course?.keyFeatures || [];
+  const objectives = course?.objectives || [];
+  const targetAudience = course?.targetProfession || [];
+  const specialties = course?.targetProfession || [];
+
+  /*
   const newDrugs = [
     { name: "Suzetrigine", description: "Novel NaV1.8 sodium-channel blocker offering a non-opioid option for acute pain management" },
     { name: "Methotrexate in Osteoarthritis", description: "Expanding indications for disease-modifying therapy in degenerative joint disease" },
@@ -65,10 +97,15 @@ const CoursesDetailsArea = () => {
     "General Practice", "Nurse Practitioner", "Physician Assistants", "Primary Care",
     "Primary Care Physicians"
   ];
+  */
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = ['overview', 'accreditation', 'fee', 'speakers'];
+      const isRichText = course?.contentType === 'richtext' || course?.contentType === 'richText';
+      const sections = isRichText
+        ? ['overview', 'fee', 'speakers']
+        : ['overview', 'accreditation', 'fee', 'speakers'];
+      
       const scrollPosition = window.scrollY + 250;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -86,7 +123,7 @@ const CoursesDetailsArea = () => {
     window.addEventListener('scroll', handleScroll);
     handleScroll();
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [course]);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -130,6 +167,14 @@ const CoursesDetailsArea = () => {
   const closeRegistrationForm = () => {
     setShowRegistrationForm(false);
   };
+
+  if (loading) {
+    return <div className="text-center py-5">Loading...</div>;
+  }
+
+  if (!course) {
+    return <div className="text-center py-5">Course not found</div>;
+  }
 
   return (
     <>
@@ -890,31 +935,40 @@ const CoursesDetailsArea = () => {
             <div className="row g-4">
               <div className="col-lg-8">
                 <div className="course-intro-box">
+                  {course.bannerImage && (
+                    <div className="course-banner mb-4">
+                      <img 
+                        src={`${BACKEND_URL}${course.bannerImage}`} 
+                        alt={course.title} 
+                        className="w-100 rounded-3" 
+                        style={{ maxHeight: '400px', objectFit: 'cover', width: '100%', borderRadius: '15px' }}
+                      />
+                    </div>
+                  )}
                   <div className="course-intro-header">
                     <h1 className="course-intro-title">
-                      Internal Medicine/Primary Care Updates and CME
+                      {course.title}
                     </h1>
                     <div className="course-intro-badges">
                       <div className="course-badge">
                         <i className="fas fa-building"></i>
-                        <span>Brilliant Board Prep LLC</span>
+                        <span>{course.organizer?.organizationName || 'MedHub'}</span>
                       </div>
                       <div className="course-badge">
                         <i className="fas fa-certificate"></i>
-                        <span>20.25 CME Credits</span>
+                        <span>{course.credits?.[0]?.value || 0} {course.credits?.[0]?.type || 'Credits'}</span>
                       </div>
                       <div className="course-badge">
                         <i className="fas fa-calendar-alt"></i>
-                        <span>Oct 2025 - Oct 2027</span>
+                        <span>{new Date(course.startDate).toLocaleDateString()} - {new Date(course.endDate).toLocaleDateString()}</span>
                       </div>
                       <div className="course-badge">
                         <i className="fas fa-users"></i>
-                        <span>In-Person</span>
+                        <span>{course.eventType || 'In-Person'}</span>
                       </div>
                     </div>
                     <p className="course-intro-description">
-                      Comprehensive continuing medical education covering the latest evidence-based updates in internal 
-                      medicine and primary care practice, featuring cutting-edge developments in pharmacotherapy and clinical management.
+                      {course.description}
                     </p>
                   </div>
                 </div>
@@ -927,12 +981,14 @@ const CoursesDetailsArea = () => {
                     >
                       Overview
                     </button>
-                    <button 
-                      className={`nav-tab-btn ${activeSection === 'accreditation' ? 'active' : ''}`}
-                      onClick={() => scrollToSection('accreditation')}
-                    >
-                      ACCREDITATION & CREDITS
-                    </button>
+                    {course?.contentType !== 'richtext' && course?.contentType !== 'richText' && (
+                      <button 
+                        className={`nav-tab-btn ${activeSection === 'accreditation' ? 'active' : ''}`}
+                        onClick={() => scrollToSection('accreditation')}
+                      >
+                        ACCREDITATION & CREDITS
+                      </button>
+                    )}
                     <button 
                       className={`nav-tab-btn ${activeSection === 'fee' ? 'active' : ''}`}
                       onClick={() => scrollToSection('fee')}
@@ -950,154 +1006,111 @@ const CoursesDetailsArea = () => {
 
                 <div id="overview" className="content-section">
                   <h3 className="section-title">Overview</h3>
-                  <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#555', marginBottom: '20px' }}>
-                    This comprehensive course provides healthcare professionals with the latest evidence-based updates in 
-                    internal medicine and primary care practice, featuring cutting-edge developments in pharmacotherapy, 
-                    diagnostic approaches, and clinical management strategies.
-                  </p>
+                  {course.contentType === 'richtext' || course.contentType === 'richText' ? (
+                    <div 
+                      className="course-description"
+                      style={{ fontSize: '16px', lineHeight: '1.8', color: '#555', marginBottom: '20px' }}
+                      dangerouslySetInnerHTML={{ __html: course.description }} 
+                    />
+                  ) : (
+                    <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#555', marginBottom: '20px' }}>
+                      {course.description}
+                    </p>
+                  )}
                 </div>
 
-                <div id="topics" className="content-section">
-                  <h3 className="section-title">Topics Covered</h3>
-                  
-                  <h4 style={{ color: '#26225B', fontSize: '24px', fontWeight: '700', marginTop: '30px', marginBottom: '20px' }}>
-                    New and Notable Drugs - Recent Additions to Clinical Practice
-                  </h4>
-                  {newDrugs.map((drug, index) => (
-                    <div key={index} className="drug-item">
-                      <h4>{drug.name}</h4>
-                      <p>{drug.description}</p>
-                    </div>
-                  ))}
+                {course.contentType !== 'richtext' && course.contentType !== 'richText' && (
+                  <>
+                    <div id="topics" className="content-section">
+                      <h3 className="section-title">Topics Covered</h3>
+                      
+                      
+                      {newDrugs.map((topic: any, index: number) => (
+                        <div key={index} className="drug-item">
+                          <h4>{topic.title}</h4>
+                          <p>{topic.description}</p>
+                        </div>
+                      ))}
 
-                  <h4 style={{ color: '#26225B', fontSize: '24px', fontWeight: '700', marginTop: '40px', marginBottom: '20px' }}>
-                    New Treatments and Emerging Clinical Concepts
-                  </h4>
-                  <div className="treatment-list">
-                    {treatments.map((treatment, index) => (
-                      <div key={index} className="treatment-item">
-                        <i className="fas fa-check-circle"></i>
-                        <span>{treatment}</span>
+                      <h4 style={{ color: '#26225B', fontSize: '24px', fontWeight: '700', marginTop: '40px', marginBottom: '20px' }}>
+                        New Treatments and Emerging Clinical Concepts
+                      </h4>
+                      <div className="treatment-list">
+                        {treatments.map((treatment: string, index: number) => (
+                          <div key={index} className="treatment-item">
+                          <i className="fas fa-check-circle"></i>
+                          <span>{treatment}</span>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div id="objectives" className="content-section">
-                  <h3 className="section-title">Educational Objectives</h3>
-                  <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#555', marginBottom: '30px' }}>
-                    Upon completion of this activity, participants should be able to:
-                  </p>
-                  {objectives.map((objective, index) => (
-                    <div key={index} className="objective-item">
-                      <i className="fas fa-graduation-cap"></i>
-                      <p style={{ margin: 0, lineHeight: 1.6 }}>{objective}</p>
                     </div>
-                  ))}
-                </div>
 
-                <div id="features" className="content-section">
-                  <h3 className="section-title">Key Features</h3>
-                  <h4 style={{ color: '#26225B', fontSize: '22px', fontWeight: '700', marginBottom: '20px' }}>
-                    Ultimate Convenience & Accessibility
-                  </h4>
-                  <div className="features-grid">
-                    <div className="feature-box">
-                      <i className="fas fa-mobile-alt"></i>
-                      <h4>Mobile App Access</h4>
-                      <p>Study during commutes, between patients, or at home</p>
+                    <div id="objectives" className="content-section">
+                      <h3 className="section-title">Educational Objectives</h3>
+                      <p style={{ fontSize: '16px', lineHeight: '1.8', color: '#555', marginBottom: '30px' }}>
+                        Upon completion of this activity, participants should be able to:
+                      </p>
+                        {objectives.map((objective: string, index: number) => (
+                        <div key={index} className="objective-item">
+                          <i className="fas fa-graduation-cap"></i>
+                          <p style={{ margin: 0, lineHeight: 1.6 }}>{objective}</p>
+                        </div>
+                        ))}
                     </div>
-                    <div className="feature-box">
-                      <i className="fas fa-couch"></i>
-                      <h4>Learn Anywhere, Anytime</h4>
-                      <p>Hospital cafeteria, call room, or your couch</p>
+
+                    <div id="features" className="content-section">
+                      <h3 className="section-title">Key Features</h3>
+                      <h4 style={{ color: '#26225B', fontSize: '22px', fontWeight: '700', marginBottom: '20px' }}>
+                        Ultimate Convenience & Accessibility
+                      </h4>
+                      <div className="features-grid">
+                        <div className="feature-box">
+                          <i className="fas fa-mobile-alt"></i>
+                          <h4>Mobile App Access</h4>
+                          <p>Study during commutes, between patients, or at home</p>
+                        </div>
+                        <div className="feature-box">
+                          <i className="fas fa-couch"></i>
+                          <h4>Learn Anywhere, Anytime</h4>
+                          <p>Hospital cafeteria, call room, or your couch</p>
+                        </div>
+                        <div className="feature-box">
+                          <i className="fas fa-pause-circle"></i>
+                          <h4>Pause & Resume</h4>
+                          <p>Pick up exactly where you left off on any device</p>
+                        </div>
+                      </div>
                     </div>
-                    <div className="feature-box">
-                      <i className="fas fa-pause-circle"></i>
-                      <h4>Pause & Resume</h4>
-                      <p>Pick up exactly where you left off on any device</p>
+
+                    <div id="accreditation" className="content-section">
+                      <h3 className="section-title">Accreditation & Credits</h3>
+                      
+                      {course.accreditation && course.accreditation.length > 0 ? (
+                        course.accreditation.map((acc: any, index: number) => (
+                          <div key={index} className="accreditation-card">
+                            <h4><i className="fas fa-certificate"></i> {acc.title}</h4>
+                            <p style={{ lineHeight: '1.8', marginBottom: '0' }}>
+                              {acc.description}
+                            </p>
+                          </div>
+                        ))
+                      ) : (
+                        <p>No accreditation information available.</p>
+                      )}
+
+                      {course.creditSummary && (
+                        <>
+                          <h4 style={{ color: '#26225B', fontSize: '24px', fontWeight: '700', marginTop: '40px', marginBottom: '20px' }}>
+                            Credit Summary
+                          </h4>
+                          <div className="credit-summary">
+                             <p>{course.creditSummary}</p>
+                          </div>
+                        </>
+                      )}
                     </div>
-                  </div>
-                </div>
-
-                <div id="accreditation" className="content-section">
-                  <h3 className="section-title">Accreditation & Credits</h3>
-                  
-                  <div className="accreditation-card">
-                    <h4><i className="fas fa-certificate"></i> Joint Accreditation Statement</h4>
-                    <p style={{ lineHeight: '1.8', marginBottom: '0' }}>
-                      In support of improving patient care, this activity has been planned and implemented by 
-                      Partners for Advancing Clinical Education (Partners) and Brilliant Board Prep LLC. Partners 
-                      is jointly accredited by the ACCME, ACPE, and ANCC to provide continuing education for the healthcare team.
-                    </p>
-                  </div>
-
-                  <div className="accreditation-card">
-                    <h4><i className="fas fa-user-md"></i> Physician Continuing Education</h4>
-                    <p style={{ lineHeight: '1.8', marginBottom: '0' }}>
-                      Partners designates this enduring material for a maximum of <strong>20.25 AMA PRA Category 1 Credit(s)™</strong>. 
-                      Physicians should claim only the credit commensurate with the extent of their participation.
-                    </p>
-                  </div>
-
-                  <div className="accreditation-card">
-                    <h4><i className="fas fa-award"></i> American Board of Internal Medicine (ABIM) MOC</h4>
-                    <p style={{ lineHeight: '1.8', marginBottom: '0' }}>
-                      Successful completion of this CME activity enables participants to earn up to <strong>20.25 ABIM MOC points</strong>. 
-                      Completion data will be submitted to the ABIM via JA-PARS within 6–8 weeks.
-                    </p>
-                  </div>
-
-                  <div className="accreditation-card">
-                    <h4><i className="fas fa-heartbeat"></i> Nursing Continuing Professional Development</h4>
-                    <p style={{ lineHeight: '1.8', marginBottom: '0' }}>
-                      The maximum number of hours awarded for this activity is <strong>20.25 contact hours</strong>.
-                    </p>
-                  </div>
-
-                  <div className="accreditation-card">
-                    <h4><i className="fas fa-stethoscope"></i> PA Continuing Medical Education</h4>
-                    <p style={{ lineHeight: '1.8', marginBottom: '10px' }}>
-                      Partners is authorized by AAPA to award <strong>20.25 AAPA Category 1 CME credits</strong>.
-                    </p>
-                    <p style={{ lineHeight: '1.8', marginBottom: '0', fontWeight: '600' }}>
-                      Approval valid until: October 1, 2027
-                    </p>
-                  </div>
-
-                  <h4 style={{ color: '#26225B', fontSize: '24px', fontWeight: '700', marginTop: '40px', marginBottom: '20px' }}>
-                    Credit Summary
-                  </h4>
-                  <div className="credit-summary">
-                    <div className="credit-item">
-                      <div className="number">20.25</div>
-                      <div className="label">AMA PRA Category 1</div>
-                    </div>
-                    <div className="credit-item">
-                      <div className="number">20.25</div>
-                      <div className="label">ABIM MOC Points</div>
-                    </div>
-                    <div className="credit-item">
-                      <div className="number">20.25</div>
-                      <div className="label">Contact Hours</div>
-                    </div>
-                    <div className="credit-item">
-                      <div className="number">20.25</div>
-                      <div className="label">AAPA Credits</div>
-                    </div>
-                  </div>
-
-                  <div style={{ marginTop: '30px', padding: '20px', background: '#f8f9ff', borderRadius: '10px', borderLeft: '4px solid #667eea' }}>
-                    <ul style={{ marginBottom: '0', paddingLeft: '20px' }}>
-                      <li style={{ marginBottom: '10px' }}><strong>ABIM MOC Points:</strong> 20.25 points automatically reported</li>
-                      <li style={{ marginBottom: '10px' }}><strong>State CME Requirements:</strong> Accepted in all 50 states</li>
-                      <li style={{ marginBottom: '10px' }}><strong>Specialty Board Requirements:</strong> Internal Medicine, Family Medicine, Subspecialties</li>
-                      <li style={{ marginBottom: '10px' }}><strong>Hospital CME Mandates:</strong> Comprehensive continuing education credits</li>
-                      <li style={{ marginBottom: '10px' }}><strong>CME Passport Integration:</strong> Seamless tracking and reporting</li>
-                      <li><strong>Jointly Provided by:</strong> Partners for Advancing Clinical Education and Brilliant Board Prep LLC</li>
-                    </ul>
-                  </div>
-                </div>
+                  </>
+                )}
 
                 <div id="fee" className="content-section">
                   <h3 className="section-title">Registration Fee</h3>
@@ -1108,29 +1121,13 @@ const CoursesDetailsArea = () => {
                     </div>
                     <h4 style={{ fontSize: '20px', marginBottom: '15px', opacity: '0.9' }}>Course Registration</h4>
                     <div style={{ fontSize: '56px', fontWeight: '800', marginBottom: '20px' }}>
-                      <span style={{ fontSize: '28px', fontWeight: '400' }}>AED</span> 1,299.00
+                      <span style={{ fontSize: '28px', fontWeight: '400' }}>AED</span> {course.price?.toFixed(2) || '0.00'}
                     </div>
                     <div style={{ background: 'rgba(255,255,255,0.1)', padding: '20px', borderRadius: '10px', marginBottom: '25px' }}>
                       <ul style={{ listStyle: 'none', padding: 0, margin: 0, textAlign: 'left' }}>
                         <li style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
                           <i className="fas fa-check-circle" style={{ color: '#FFD700', marginRight: '10px' }}></i>
-                          <strong>20.25 CME Credits</strong> included
-                        </li>
-                        <li style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <i className="fas fa-check-circle" style={{ color: '#FFD700', marginRight: '10px' }}></i>
-                          <strong>2 Years</strong> unlimited access
-                        </li>
-                        <li style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <i className="fas fa-check-circle" style={{ color: '#FFD700', marginRight: '10px' }}></i>
-                          <strong>Mobile & Desktop</strong> access
-                        </li>
-                        <li style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                          <i className="fas fa-check-circle" style={{ color: '#FFD700', marginRight: '10px' }}></i>
-                          <strong>Certificate</strong> upon completion
-                        </li>
-                        <li style={{ padding: '10px 0' }}>
-                          <i className="fas fa-check-circle" style={{ color: '#FFD700', marginRight: '10px' }}></i>
-                          <strong>ABIM MOC Points</strong> automatically reported
+                          <strong>{course.credits?.[0]?.value || 0} {course.credits?.[0]?.type || 'Credits'}</strong> included
                         </li>
                       </ul>
                     </div>
@@ -1149,23 +1146,36 @@ const CoursesDetailsArea = () => {
 
                 <div id="speakers" className="content-section">
                   <h3 className="section-title">Speakers</h3>
-                  <Link href="/instructor-details" className="speaker-card">
-                    <div className="speaker-card-content">
-                      <div className="speaker-image-wrapper">
-                        <img src="/assets/img/testimonial/Testimonial-home/512x5122.png" alt="Dr. David R. Polizzi, MD" />
-                      </div>
-                      <div className="speaker-info">
-                        <h4 style={{ marginBottom: '5px' }}>Dr. David R. Polizzi, MD</h4>
-                        <p style={{ color: '#666', margin: 0, fontSize: '16px', fontWeight: '600' }}>Family Medicine</p>
-                      </div>
-                    </div>
-                  </Link>
+                  {course.speakers && course.speakers.length > 0 ? (
+                    course.speakers.map((speaker: any, index: number) => (
+                      <Link key={index} href={`/instructor-details/${speaker._id}`} className="speaker-card mb-3">
+                        <div className="speaker-card-content">
+                          <div className="speaker-image-wrapper">
+                            <img 
+                              src={speaker.profileImage ? `${BACKEND_URL}${speaker.profileImage}` : "/assets/img/testimonial/Testimonial-home/512x5122.png"} 
+                              alt={speaker.name} 
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = "/assets/img/testimonial/Testimonial-home/512x5122.png";
+                              }}
+                            />
+                          </div>
+                          <div className="speaker-info">
+                            <h4 style={{ marginBottom: '5px' }}>{speaker.name}</h4>
+                            <p style={{ color: '#666', margin: 0, fontSize: '16px', fontWeight: '600' }}>{speaker.jobTitle}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <p>No speakers listed.</p>
+                  )}
                 </div>
 
                 <div id="audience" className="content-section">
                   <h3 className="section-title">Target Audience</h3>
                   <div className="badge-grid">
-                    {targetAudience.map((audience, index) => (
+                    {targetAudience.map((audience: string, index: number) => (
                       <span key={index} className="badge-item">{audience}</span>
                     ))}
                   </div>
@@ -1174,7 +1184,7 @@ const CoursesDetailsArea = () => {
                 <div id="specialties" className="content-section">
                   <h3 className="section-title">Specialties</h3>
                   <div className="badge-grid">
-                    {specialties.map((specialty, index) => (
+                    {specialties.map((specialty: string, index: number) => (
                       <span key={index} className="badge-item">{specialty}</span>
                     ))}
                   </div>
@@ -1186,9 +1196,9 @@ const CoursesDetailsArea = () => {
                   <div style={{ textAlign: 'center', marginBottom: '20px' }}>
                     <i className="fas fa-medal" style={{ fontSize: '50px', color: '#FFD700' }}></i>
                   </div>
-                  <h3 style={{ textAlign: 'center', color: 'white', marginBottom: '10px', fontSize: '22px' }}>Internal Medicine/Primary Care Updates and CME</h3>
+                  <h3 style={{ textAlign: 'center', color: 'white', marginBottom: '10px', fontSize: '22px' }}>{course.title}</h3>
                   <div className="price-tag-modern">
-                    <small>AED</small> 1,299.00
+                    <small>AED</small> {course.price?.toFixed(2) || '0.00'}
                   </div>
                   
                   <div className="quantity-selector">
@@ -1204,7 +1214,7 @@ const CoursesDetailsArea = () => {
                   <div style={{ textAlign: 'center', padding: '20px 0', borderTop: '1px solid rgba(255,255,255,0.2)',
                               borderBottom: '1px solid rgba(255,255,255,0.2)', margin: '20px 0' }}>
                     <div style={{ fontSize: '14px', opacity: 0.8, marginBottom: '8px' }}>Total Amount</div>
-                    <div style={{ fontSize: '32px', fontWeight: 'bold' }}>AED {(1299 * quantity).toFixed(2)}</div>
+                    <div style={{ fontSize: '32px', fontWeight: 'bold' }}>AED {((course.price || 0) * quantity).toFixed(2)}</div>
                   </div>
 
                   <button className="register-btn-modern" onClick={openRegistrationForm}>
@@ -1226,28 +1236,28 @@ const CoursesDetailsArea = () => {
                         <i className="fas fa-chalkboard-teacher"></i>
                         Faculty
                       </span>
-                      <span className="info-value">Dr. David R. Polizzi, MD</span>
+                      <span className="info-value">{course.speakers?.[0]?.name || 'TBA'}</span>
                     </li>
                     <li>
                       <span className="info-label">
                         <i className="fas fa-award"></i>
                         CME Credits
                       </span>
-                      <span className="info-value">20.25 Credits</span>
+                      <span className="info-value">{course.credits?.[0]?.value || 0} Credits</span>
                     </li>
                     <li>
                       <span className="info-label">
                         <i className="fas fa-calendar-check"></i>
                         Duration
                       </span>
-                      <span className="info-value">2 Years Access</span>
+                      <span className="info-value">{Math.ceil((new Date(course.endDate).getTime() - new Date(course.startDate).getTime()) / (1000 * 60 * 60 * 24))} Days</span>
                     </li>
                     <li>
                       <span className="info-label">
                         <i className="fas fa-video"></i>
                         Format
                       </span>
-                      <span className="info-value">Online Webcast</span>
+                      <span className="info-value">{course.eventType || 'In-Person'}</span>
                     </li>
                     <li>
                       <span className="info-label">

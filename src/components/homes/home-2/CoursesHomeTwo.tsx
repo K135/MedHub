@@ -132,8 +132,10 @@ const CoursesHomeTwo = () => {
                     if (swiper.params.navigation && typeof swiper.params.navigation !== 'boolean') {
                       swiper.params.navigation.prevEl = prevRef.current;
                       swiper.params.navigation.nextEl = nextRef.current;
-                      swiper.navigation.init();
-                      swiper.navigation.update();
+                      if (swiper.navigation) {
+                        swiper.navigation.init();
+                        swiper.navigation.update();
+                      }
                     }
                   }, 100);
                 }}

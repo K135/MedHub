@@ -1,90 +1,10 @@
 "use client";
 
 import Link from 'next/link';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import axiosInstance, { BACKEND_URL } from '../../../api/axios';
 
 // CME / CPD Programs in Middle East
-const courses = [
-  {
-    id: 1,
-    category: 'Cardiology',
-    image: 'assets/img/courses/homecourse/Dubai International Cardiology.jpg',
-    title: 'Dubai International Cardiology Conference',
-    topicTitle: 'Advanced Cardiac Care',
-    organizer: 'MedEd Global',
-    cmePoints: 12,
-    attendees: '200+ Attendees',
-    rating: 5,
-    link: '/courses-details',
-    region: 'Middle East'
-  },
-  {
-    id: 2,
-    category: 'Nursing',
-    image: 'assets/img/courses/homecourse/Middle East Nursing & Midwifery Summit.jpg',
-    title: 'Middle East Nursing & Midwifery Summit',
-    topicTitle: 'Nursing & Allied Health',
-    organizer: 'Healthcare Innovations Ltd',
-    cmePoints: 10,
-    attendees: '150+ Attendees',
-    rating: 5,
-    link: '/courses-details',
-    region: 'Middle East'
-  },
-  {
-    id: 3,
-    category: 'Allied Health',
-    image: 'assets/img/courses/homecourse/Accreditation & Quality Assurance.jpg',
-    title: 'Accreditation & Quality Assurance',
-    topicTitle: 'Professional Development',
-    organizer: 'Quality Care Institute',
-    cmePoints: 8,
-    attendees: '100+ Attendees',
-    rating: 5,
-    link: '/courses-details',
-    region: 'Middle East'
-  },
-  {
-    id: 4,
-    category: 'Cardiology',
-    image: 'assets/img/courses/homecourse/Abu Dhabi Emergency Medicine Conference.jpg',
-    title: 'Abu Dhabi Emergency Medicine Conference',
-    topicTitle: 'Emergency & Critical Care',
-    organizer: 'Emergency Med Partners',
-    cmePoints: 15,
-    attendees: '180+ Attendees',
-    rating: 5,
-    link: '/courses-details',
-    region: 'Middle East'
-  },
-  {
-    id: 5,
-    category: 'Nursing',
-    image: 'assets/img/courses/homecourse/Riyadh Healthcare Leadership Summit.jpg',
-    title: 'Riyadh Healthcare Leadership Summit',
-    topicTitle: 'Healthcare Management',
-    organizer: 'Leadership Academy ME',
-    cmePoints: 14,
-    attendees: '250+ Attendees',
-    rating: 5,
-    link: '/courses-details',
-    region: 'Middle East'
-  },
-  {
-    id: 6,
-    category: 'Allied Health',
-    image: 'assets/img/courses/homecourse/Middle East Radiology Conference.jpg',
-    title: 'Middle East Radiology Conference',
-    topicTitle: 'Diagnostic Imaging',
-    organizer: 'Radiology Excellence Group',
-    cmePoints: 11,
-    attendees: '120+ Attendees',
-    rating: 5,
-    link: '/courses-details',
-    region: 'Middle East'
-  }
-];
-
 const categories = [
   { id: 'All', label: 'All Programs', icon: 'fas fa-th' },
   { id: 'Cardiology', label: 'Cardiology', icon: 'fas fa-heartbeat' },
@@ -99,11 +19,46 @@ const categories = [
   { id: 'Pharmacy', label: 'Pharmacy', icon: 'fas fa-pills' }
 ];
 
+
+interface Course {
+  _id: string;
+  title: string;
+  bannerImage?: string;
+  targetProfession?: string[];
+  rating?: number;
+  organizer?: {
+    _id: string;
+    organizationName: string;
+  };
+  credits?: {
+    type: string;
+    value: string;
+  }[];
+  category?: string;
+}
+
 const PopularCoursesHomeTwo = () => {
   const [activeTab, setActiveTab] = React.useState('All');
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeaturedCourses = async () => {
+      try {
+        const res = await axiosInstance.get('/courses/featured');
+        setCourses(res.data);
+      } catch (err) {
+        console.error('Error fetching featured courses:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFeaturedCourses();
+  }, []);
 
   const checkScroll = () => {
     if (scrollContainerRef.current) {
@@ -135,13 +90,28 @@ const PopularCoursesHomeTwo = () => {
     return () => window.removeEventListener('resize', checkScroll);
   }, []);
 
+  const slugify = (text: string) => {
+    return text
+      .toString()
+      .toLowerCase()
+      .replace(/\s+/g, '-')           // Replace spaces with -
+      .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+      .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+      .replace(/^-+/, '')             // Trim - from start of text
+      .replace(/-+$/, '');            // Trim - from end of text
+  };
+
   const filteredCourses = activeTab === 'All' 
     ? courses 
     : courses.filter(course => 
-        activeTab === 'AlliedHealth' 
-          ? course.category === 'Allied Health' 
-          : course.category === activeTab
+        // Check if targetProfession array includes the active tab or matches category
+        course.targetProfession?.some(p => p.includes(activeTab)) || 
+        course.category === activeTab
       );
+
+  if (loading) {
+    return <div className="text-center py-20">Loading featured courses...</div>;
+  }
 
   return (
     <>
@@ -349,6 +319,17 @@ const PopularCoursesHomeTwo = () => {
             font-size: 14px;
           }
         }
+
+        .post-cat li span {
+          color: #666;
+          font-size: 14px;
+          font-weight: 500;
+          transition: all 0.3s ease;
+        }
+        
+        .post-cat li span:hover {
+          color: #26225B;
+        }
       `}</style>
 
       <section className="popular-courses-section fix section-padding section-bg">
@@ -406,28 +387,35 @@ const PopularCoursesHomeTwo = () => {
               <div className="row">
                 {filteredCourses.map((course, index) => (
                   <div 
-                    key={course.id} 
+                    key={course._id} 
                     className="col-xl-4 col-lg-6 col-md-6"
                   >
                     <div className="courses-card-main-items">
-                      <Link href={course.link} className="clickable-card">
+                      <Link href={`/courses-details?${slugify(course.title)}&id=${course._id}`} className="clickable-card">
                         <div className="courses-card-items style-2">
                           <div className="courses-image">
-                            <img src={course.image} alt={course.title} />
+                            <img 
+                              src={course.bannerImage ? `${BACKEND_URL}${course.bannerImage}` : 'assets/img/courses/course_thumb_01.jpg'} 
+                              alt={course.title} 
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'assets/img/courses/course_thumb_01.jpg';
+                              }}
+                            />
                           </div>
                           <div className="courses-content">
                             <ul className="post-cat">
                               <li>
-                                <Link href="/courses">{course.category}</Link>
+                                <span className="category-tag">{course.targetProfession?.[0] || 'General'}</span>
                               </li>
                               <li>
-                                {[...Array(course.rating)].map((_, i) => (
-                                  <i key={i} className="fas fa-star"></i>
+                                {[...Array(5)].map((_, i) => (
+                                  <i key={i} className={`fas fa-star ${i < (course.rating || 5) ? '' : 'text-gray-300'}`}></i>
                                 ))}
                               </li>
                             </ul>
                             <h3>
-                              <Link href={course.link}>
+                              <Link href={`/courses-details?${slugify(course.title)}&id=${course._id}`}>
                                 {course.title}
                               </Link>
                             </h3>
@@ -440,12 +428,18 @@ const PopularCoursesHomeTwo = () => {
                                   marginRight: '8px'
                                 }}
                               ></i>
-                              <p>{course.organizer}</p>
+                              <p>{course.organizer?.organizationName || 'MedHub'}</p>
                             </div>
                             <ul className="post-class">
                               <li>
                                 <i className="fas fa-certificate"></i>
-                                CME Points - {course.cmePoints}
+                                {course.credits && course.credits.length > 0 ? (
+                                  <>
+                                    {course.credits[0].value} {course.credits[0].type}
+                                  </>
+                                ) : (
+                                  '0 Credits'
+                                )}
                               </li>
                               <li>
                                 <span className="theme-btn">Explore</span>

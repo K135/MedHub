@@ -43,24 +43,28 @@ const menu_data:DataType[] = [
 	},
 	{
 		id: 2,
-		title: "CME / CPD Courses",
+		title: "CME/CPD Courses & Conferences",
 		link: "/courses",
     icon: "fas fa-book",
-		has_dropdown: false,
-	},
-	{
-		id: 3,
-		title: "Events",
-		link: "/event",
-    icon: "fas fa-gift",
-		has_dropdown: false,
+		has_dropdown: true,
+		sub_menus: [
+			{ link: "/courses?course-format=In-Person", title: "In Person" },
+			{ link: "/courses?course-format=Online", title: "Online" },
+			{ link: "/courses?course-format=Hybrid", title: "Hybrid" },
+		],
 	},
 	{
 		id: 4,
-		title: "About",
-		link: "/about",
-    icon: "fas fa-shopping-bag",
-		has_dropdown: false,
+		title: "News and Articles",
+		link: "/news",
+    icon: "fas fa-newspaper",
+		has_dropdown: true,
+		sub_menus: [
+			{ link: "/news", title: "Blogs" },
+			{ link: "/news", title: "Articles" },
+			{ link: "/news", title: "News" },
+			{ link: "/news", title: "Interviews" },
+		],
 	},
 	{
 		id: 5,
@@ -68,23 +72,13 @@ const menu_data:DataType[] = [
 		link: "#",
     icon: "fas fa-file-alt",
 		has_dropdown: true,
-		has_dropdown_inner: true,
+		has_dropdown_inner: false,
 		sub_menus: [
+			{ link: "/about", title: "About" },
 			{ link: "/instructor", title: "Faculty & Speakers" },
-			{ link: "/instructor-details", title: "Speaker Profile" },
 			{ link: "/gallery", title: "Gallery" },
-			{ link: "/pricing", title: "Membership Plans" },
 			{ link: "/faq", title: "FAQs" },
-			{
-				inner_menu: true,
-				title: "Insights",
-				inner_menus: [
-					{ link: "/news", title: "Medical Insights" },
-					{ link: "/news-details", title: "Article Details" },
-				]
-			},
-			{ link: "/sign-in", title: "Sign In" },
-			{ link: "/register", title: "Register" },
+			{ link: "/career", title: "Career" },
 		],
 	},
 	{

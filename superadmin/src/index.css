@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-gradient-start: #f8fafc;
+    --bg-gradient-mid: #f1f5f9;
+    --bg-gradient-end: #e2e8f0;
+    --sidebar-bg: rgba(255, 255, 255, 0.95);
+    --header-bg: rgba(255, 255, 255, 0.8);
+    --card-bg: rgba(255, 255, 255, 0.9);
+    --border-color: rgba(226, 232, 240, 0.6);
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+  }
+
+  [data-theme="dark"] {
+    --bg-gradient-start: #0f0e24;
+    --bg-gradient-mid: #25225B;
+    --bg-gradient-end: #45417e;
+    --sidebar-bg: rgba(26, 24, 59, 0.95);
+    --header-bg: rgba(255, 255, 255, 0.05);
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+  }
+
+  body {
+    @apply font-sans antialiased transition-colors duration-300;
+    color: var(--text-primary);
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+    background-attachment: fixed;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/80 backdrop-blur-xl border border-white/40 shadow-xl;
+  }
+
+  .glass-dark {
+    @apply bg-[#25225B]/90 backdrop-blur-xl border border-white/10 shadow-xl text-white;
+  }
+
+  .glass-card {
+    @apply bg-white/90 backdrop-blur-md border border-slate-100 shadow-[0_8px_30px_rgb(0, 0, 0, 0.04)] rounded-3xl;
+  }
+
+  .input-field {
+    @apply w-full px-5 py-4 rounded-2xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 transition-all duration-300 outline-none placeholder:text-slate-400 font-medium;
+  }
+
+  .btn-primary {
+    @apply px-8 py-4 bg-[#25225B] text-white rounded-2xl font-semibold shadow-lg shadow-primary-900/20 hover:shadow-primary-900/30 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply px-8 py-4 bg-[#FED15E] text-[#25225B] rounded-2xl font-bold shadow-lg shadow-secondary-400/30 hover:shadow-secondary-400/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300;
+  }
+
+  .animated-gradient {
+    background: linear-gradient(270deg, #25225B, #45417e, #FED15E, #25225B);
+    background-size: 800% 800%;
+    animation: gradientShift 15s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .mesh-gradient {
+    background: 
+      radial-gradient(at 27% 37%, rgba(254, 209, 94, 0.15) 0px, transparent 50%),
+      radial-gradient(at 97% 21%, rgba(69, 65, 126, 0.2) 0px, transparent 50%),
+      radial-gradient(at 52% 99%, rgba(37, 34, 91, 0.15) 0px, transparent 50%),
+      radial-gradient(at 10% 29%, rgba(254, 209, 94, 0.1) 0px, transparent 50%),
+      radial-gradient(at 97% 96%, rgba(37, 34, 91, 0.2) 0px, transparent 50%),
+      radial-gradient(at 33% 50%, rgba(69, 65, 126, 0.15) 0px, transparent 50%),
+      radial-gradient(at 79% 53%, rgba(254, 209, 94, 0.1) 0px, transparent 50%);
+  }
+
+  .glow-effect {
+    box-shadow: 
+      0 0 20px rgba(254, 209, 94, 0.3),
+      0 0 40px rgba(254, 209, 94, 0.2),
+      0 10px 60px rgba(37, 34, 91, 0.4);
+  }
+
+  .floating {
+    animation: floating 3s ease-in-out infinite;
+  }
+
+  @keyframes floating {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .perspective-card {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .card-3d {
+    transform: rotateY(0deg) rotateX(0deg);
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .card-3d:hover {
+    transform: rotateY(5deg) rotateX(5deg) translateY(-8px);
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
